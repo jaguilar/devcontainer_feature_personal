@@ -31,25 +31,39 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
-      - name: Create PR for Documentation
+      - name: Sync Automated Documentation
         id: push_image_info
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
           set -e
-          echo "Start."
-          # Configure git and Push updates
+          echo "Start documentation sync."
+
+          # Configure git
           git config --global user.email "github-actions[bot]@users.noreply.github.com"
           git config --global user.name "github-actions[bot]"
-          git config pull.rebase false
+
+          # Stage generated documentation
+          git add */**/README.md
+          if git diff --staged --quiet; then
+              echo "No documentation changes detected."
+              exit 0
+          fi
+
+          message='Automated documentation update [skip ci]'
+          git commit -m "$message"
+
+          # 1. Try pushing directly to master first
+          echo "Attempting direct push to master..."
+          if git push origin HEAD:master 2>/dev/null; then
+              echo "Successfully pushed documentation directly to master."
+              exit 0
+          fi
+
+          # 2. Fall back to branch + Pull Request (e.g. if master has branch protection)
+          echo "Direct push to master not available. Creating documentation branch and PR..."
           branch=automated-documentation-update-$GITHUB_RUN_ID
           git checkout -b "$branch"
-          message='Automated documentation update'
-          # Add / update and commit
-          git add */**/README.md
-          git commit -m 'Automated documentation update [skip ci]' || export NO_UPDATES=true
-          # Push
-          if [ "$NO_UPDATES" != "true" ] ; then
-              git push origin "$branch"
-              gh pr create --title "$message" --body "$message"
-          fi
+          git push --force origin "$branch"
+          gh pr create --title "Automated documentation update" --body "Automated documentation update" || echo "PR already exists or could not be created."
+
