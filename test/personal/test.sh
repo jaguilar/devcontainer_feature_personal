@@ -33,7 +33,11 @@ check "config.env exists" test -f /usr/local/share/devcontainer-personal/config.
 check "profile.d environment script exists" test -f /etc/profile.d/devcontainer-personal.sh
 check "staging directory /var/lib/devcontainer-personal exists" test -d /var/lib/devcontainer-personal
 
-# 2. Verify entrypoint ran during container boot or runs in setup mode
+# 2. Target home verification
+REMOTE_USER_HOME=$(grep '^REMOTE_USER_HOME=' /usr/local/share/devcontainer-personal/config.env | cut -d= -f2 | tr -d '"')
+TARGET_HOME="${REMOTE_USER_HOME:-$HOME}"
+
+# 3. Verify entrypoint ran during container boot or runs in setup mode
 if [ ! -d "${TARGET_HOME}/.pi/agent/history" ]; then
     if [ "$(id -u)" -ne 0 ] && command -v sudo >/dev/null 2>&1 && sudo -n true 2>/dev/null; then
         sudo /usr/local/share/devcontainer-personal/entrypoint.sh --setup-only
@@ -41,10 +45,6 @@ if [ ! -d "${TARGET_HOME}/.pi/agent/history" ]; then
         /usr/local/share/devcontainer-personal/entrypoint.sh --setup-only
     fi
 fi
-
-# 4. Target home verification
-REMOTE_USER_HOME=$(grep '^REMOTE_USER_HOME=' /usr/local/share/devcontainer-personal/config.env | cut -d= -f2 | tr -d '"')
-TARGET_HOME="${REMOTE_USER_HOME:-$HOME}"
 
 check "user ~/.gemini exists" test -d "${TARGET_HOME}/.gemini"
 check "user ~/.pi exists" test -d "${TARGET_HOME}/.pi"

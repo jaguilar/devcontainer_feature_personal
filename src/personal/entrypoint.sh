@@ -154,6 +154,9 @@ setup_pi_protected() {
                 [ -e "${item}" ] || continue
                 local base="$(basename "${item}")"
                 if [ "${base}" != "history" ] && [ "${base}" != "sessions" ]; then
+                    if [ -e "${TARGET_DIR}/agent/${base}" ] && mountpoint -q "${TARGET_DIR}/agent/${base}" 2>/dev/null; then
+                        continue
+                    fi
                     ln -sfn "${item}" "${TARGET_DIR}/agent/${base}"
                 fi
             done
@@ -162,8 +165,10 @@ setup_pi_protected() {
 
     # Bind mount settings.json read-only so even root cannot write
     if [ -e "${TARGET_DIR}/agent/settings.json" ]; then
-        mount --bind "${TARGET_DIR}/agent/settings.json" "${TARGET_DIR}/agent/settings.json" 2>/dev/null || true
-        mount -o remount,bind,ro "${TARGET_DIR}/agent/settings.json" 2>/dev/null || true
+        if ! mountpoint -q "${TARGET_DIR}/agent/settings.json" 2>/dev/null; then
+            mount --bind "${TARGET_DIR}/agent/settings.json" "${TARGET_DIR}/agent/settings.json" 2>/dev/null || true
+            mount -o remount,bind,ro "${TARGET_DIR}/agent/settings.json" 2>/dev/null || true
+        fi
     fi
 
     # 3. Setup persistent writable history
