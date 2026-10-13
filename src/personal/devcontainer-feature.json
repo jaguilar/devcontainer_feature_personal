@@ -1,0 +1,73 @@
+{
+  "id": "personal",
+  "version": "1.1.0",
+  "name": "Personal Customizations",
+  "description": "Installs personal customizations with overlay mounts for ~/.gemini and ~/.pi (read-only host credentials and persistent named volumes across rebuilds, with selective write protection for pi.dev settings).",
+  "keywords": [
+    "personal",
+    "customizations",
+    "credentials",
+    "gemini",
+    "antigravity",
+    "pi",
+    "pi.dev",
+    "overlay",
+    "volume"
+  ],
+  "options": {
+    "enableGemini": {
+      "type": "boolean",
+      "default": true,
+      "description": "Enable ~/.gemini overlay mount"
+    },
+    "enablePi": {
+      "type": "boolean",
+      "default": true,
+      "description": "Enable ~/.pi overlay mount"
+    },
+    "piProtectSettings": {
+      "type": "boolean",
+      "default": true,
+      "description": "Ensure pi.dev settings are strictly read-only, permitting writes only to ~/.pi/agent/history and ~/.pi/agent/sessions"
+    },
+    "piWritablePaths": {
+      "type": "string",
+      "default": "agent/history,agent/sessions",
+      "description": "Comma-separated list of subpaths inside ~/.pi permitted to accept writes"
+    },
+    "updatePath": {
+      "type": "boolean",
+      "default": true,
+      "description": "Add ~/.gemini/bin, ~/.gemini/antigravity/bin, ~/.pi/bin, and ~/.pi/agent/bin to PATH"
+    }
+  },
+  "mounts": [
+    {
+      "source": "${localEnv:HOME}/.gemini",
+      "target": "/var/lib/devcontainer-personal/ro-gemini",
+      "type": "bind"
+    },
+    {
+      "source": "devcontainer-personal-gemini-${devcontainerId}",
+      "target": "/var/lib/devcontainer-personal/volume-gemini",
+      "type": "volume"
+    },
+    {
+      "source": "${localEnv:HOME}/.pi",
+      "target": "/var/lib/devcontainer-personal/ro-pi",
+      "type": "bind"
+    },
+    {
+      "source": "devcontainer-personal-pi-${devcontainerId}",
+      "target": "/var/lib/devcontainer-personal/volume-pi",
+      "type": "volume"
+    }
+  ],
+  "entrypoint": "/usr/local/share/devcontainer-personal/entrypoint.sh",
+  "capAdd": [
+    "SYS_ADMIN"
+  ],
+  "securityOpt": [
+    "apparmor:unconfined"
+  ]
+}

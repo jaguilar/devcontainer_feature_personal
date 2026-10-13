@@ -1,0 +1,15 @@
+{
+  "test_default": {
+    "image": "mcr.microsoft.com/devcontainers/base:debian",
+    "features": {
+      "personal": {}
+    }
+  },
+  "test_ubuntu": {
+    "image": "mcr.microsoft.com/devcontainers/base:ubuntu",
+    "features": {
+      "personal": {}
+    }
+  }
+}
+
