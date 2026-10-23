@@ -1,13 +1,15 @@
 {
   "id": "personal",
-  "version": "1.1.0",
+  "version": "1.2.0",
   "name": "Personal Customizations",
-  "description": "Installs personal customizations with overlay mounts for ~/.gemini and ~/.pi (read-only host credentials and persistent named volumes across rebuilds, with selective write protection for pi.dev settings).",
+  "description": "Installs personal customizations with overlay mounts for ~/.gemini, ~/.claude, ~/.config/opencode, and ~/.pi (read-only host credentials and persistent named volumes across rebuilds, with selective write protection for pi.dev settings).",
   "keywords": [
     "personal",
     "customizations",
     "credentials",
     "gemini",
+    "claude",
+    "opencode",
     "antigravity",
     "pi",
     "pi.dev",
@@ -19,6 +21,16 @@
       "type": "boolean",
       "default": true,
       "description": "Enable ~/.gemini overlay mount"
+    },
+    "enableClaude": {
+      "type": "boolean",
+      "default": true,
+      "description": "Enable ~/.claude overlay mount"
+    },
+    "enableOpencode": {
+      "type": "boolean",
+      "default": true,
+      "description": "Enable ~/.config/opencode overlay mount"
     },
     "enablePi": {
       "type": "boolean",
@@ -38,7 +50,7 @@
     "updatePath": {
       "type": "boolean",
       "default": true,
-      "description": "Add ~/.gemini/bin, ~/.gemini/antigravity/bin, ~/.pi/bin, and ~/.pi/agent/bin to PATH"
+      "description": "Add ~/.gemini/bin, ~/.gemini/antigravity/bin, ~/.claude/bin, ~/.local/bin, ~/.pi/bin, and ~/.pi/agent/bin to PATH"
     }
   },
   "mounts": [
@@ -50,6 +62,26 @@
     {
       "source": "devcontainer-personal-gemini-${devcontainerId}",
       "target": "/var/lib/devcontainer-personal/volume-gemini",
+      "type": "volume"
+    },
+    {
+      "source": "${localEnv:HOME}/.claude",
+      "target": "/var/lib/devcontainer-personal/ro-claude",
+      "type": "bind"
+    },
+    {
+      "source": "devcontainer-personal-claude-${devcontainerId}",
+      "target": "/var/lib/devcontainer-personal/volume-claude",
+      "type": "volume"
+    },
+    {
+      "source": "${localEnv:HOME}/.config/opencode",
+      "target": "/var/lib/devcontainer-personal/ro-opencode",
+      "type": "bind"
+    },
+    {
+      "source": "devcontainer-personal-opencode-${devcontainerId}",
+      "target": "/var/lib/devcontainer-personal/volume-opencode",
       "type": "volume"
     },
     {

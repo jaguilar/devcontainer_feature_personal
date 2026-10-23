@@ -8,6 +8,8 @@ fi
 
 VAR_DIR="${VAR_DIR:-/var/lib/devcontainer-personal}"
 ENABLE_GEMINI="${ENABLE_GEMINI:-true}"
+ENABLE_CLAUDE="${ENABLE_CLAUDE:-true}"
+ENABLE_OPENCODE="${ENABLE_OPENCODE:-true}"
 ENABLE_PI="${ENABLE_PI:-true}"
 PI_PROTECT_SETTINGS="${PI_PROTECT_SETTINGS:-true}"
 PI_WRITABLE_PATHS="${PI_WRITABLE_PATHS:-agent/history,agent/sessions}"
@@ -37,14 +39,15 @@ fi
 TARGET_UID=$(id -u "${TARGET_USER}" 2>/dev/null || echo 0)
 TARGET_GID=$(id -g "${TARGET_USER}" 2>/dev/null || echo 0)
 
-# Full overlay setup (used for ~/.gemini, and ~/.pi if PI_PROTECT_SETTINGS is false)
+# Full overlay setup (used for ~/.gemini, ~/.claude, ~/.config/opencode, and ~/.pi if PI_PROTECT_SETTINGS is false)
 setup_overlay() {
     local NAME="$1"
+    local TARGET_SUBDIR="${2:-.${NAME}}"
     local RO_DIR="${VAR_DIR}/ro-${NAME}"
     local VOL_DIR="${VAR_DIR}/volume-${NAME}"
-    local TARGET_DIR="${TARGET_HOME}/.${NAME}"
+    local TARGET_DIR="${TARGET_HOME}/${TARGET_SUBDIR}"
 
-    echo "[personal-customizations] Configuring full overlay for ~/.${NAME}..."
+    echo "[personal-customizations] Configuring full overlay for ~/${TARGET_SUBDIR}..."
 
     # Ensure persistent named volume structure exists
     mkdir -p "${VOL_DIR}/upper" "${VOL_DIR}/work"
@@ -74,7 +77,7 @@ setup_overlay() {
         if mount -t overlay overlay \
             -o lowerdir="${LOWER_DIR}",upperdir="${VOL_DIR}/upper",workdir="${VOL_DIR}/work" \
             "${TARGET_DIR}" 2>/dev/null; then
-            echo "[personal-customizations] Mounted ~/.${NAME} using kernel OverlayFS."
+            echo "[personal-customizations] Mounted ~/${TARGET_SUBDIR} using kernel OverlayFS."
             MOUNTED=true
         fi
 
@@ -83,7 +86,7 @@ setup_overlay() {
             if fuse-overlayfs \
                 -o lowerdir="${LOWER_DIR}",upperdir="${VOL_DIR}/upper",workdir="${VOL_DIR}/work" \
                 "${TARGET_DIR}" 2>/dev/null; then
-                echo "[personal-customizations] Mounted ~/.${NAME} using fuse-overlayfs."
+                echo "[personal-customizations] Mounted ~/${TARGET_SUBDIR} using fuse-overlayfs."
                 MOUNTED=true
             fi
         fi
@@ -105,7 +108,7 @@ setup_overlay() {
             fi
         fi
     else
-        echo "[personal-customizations] ~/.${NAME} is already mounted."
+        echo "[personal-customizations] ~/${TARGET_SUBDIR} is already mounted."
     fi
 
     # Fix permissions for target user
@@ -113,9 +116,32 @@ setup_overlay() {
 
     # Mirror to /root if target user is not root
     if [ "${TARGET_HOME}" != "/root" ]; then
-        mkdir -p /root
-        if [ ! -e "/root/.${NAME}" ] && [ ! -L "/root/.${NAME}" ]; then
-            ln -sf "${TARGET_DIR}" "/root/.${NAME}" 2>/dev/null || true
+        local ROOT_TARGET="/root/${TARGET_SUBDIR}"
+        mkdir -p "$(dirname "${ROOT_TARGET}")"
+        if [ ! -e "${ROOT_TARGET}" ] && [ ! -L "${ROOT_TARGET}" ]; then
+            ln -sf "${TARGET_DIR}" "${ROOT_TARGET}" 2>/dev/null || true
+        fi
+    fi
+
+    # Convenience links for OpenCode
+    if [ "${NAME}" = "opencode" ]; then
+        if [ ! -e "${TARGET_HOME}/.opencode" ] && [ ! -L "${TARGET_HOME}/.opencode" ]; then
+            ln -sf "${TARGET_DIR}" "${TARGET_HOME}/.opencode" 2>/dev/null || true
+        fi
+        if [ "${TARGET_HOME}" != "/root" ]; then
+            if [ ! -e "/root/.opencode" ] && [ ! -L "/root/.opencode" ]; then
+                ln -sf "/root/${TARGET_SUBDIR}" "/root/.opencode" 2>/dev/null || true
+            fi
+        fi
+        mkdir -p "${TARGET_HOME}/.local/share"
+        if [ ! -e "${TARGET_HOME}/.local/share/opencode" ] && [ ! -L "${TARGET_HOME}/.local/share/opencode" ]; then
+            ln -sf "${TARGET_DIR}" "${TARGET_HOME}/.local/share/opencode" 2>/dev/null || true
+        fi
+        if [ "${TARGET_HOME}" != "/root" ]; then
+            mkdir -p /root/.local/share
+            if [ ! -e "/root/.local/share/opencode" ] && [ ! -L "/root/.local/share/opencode" ]; then
+                ln -sf "/root/${TARGET_SUBDIR}" "/root/.local/share/opencode" 2>/dev/null || true
+            fi
         fi
     fi
 }
@@ -211,6 +237,14 @@ else
     # Running as root: perform mount setups
     if [ "${ENABLE_GEMINI}" = "true" ]; then
         setup_overlay "gemini"
+    fi
+
+    if [ "${ENABLE_CLAUDE}" = "true" ]; then
+        setup_overlay "claude"
+    fi
+
+    if [ "${ENABLE_OPENCODE}" = "true" ]; then
+        setup_overlay "opencode" ".config/opencode"
     fi
 
     if [ "${ENABLE_PI}" = "true" ]; then

@@ -5,7 +5,7 @@ A collection of Dev Container Features for personal development environments.
 ## Features in this repository
 
 ### 1. Personal Customizations (`personal`)
-Configures personal development customizations with overlay mounts for `~/.gemini` and `~/.pi` (read-only host credentials and persistent named volumes across rebuilds, with selective write protection for pi.dev settings).
+Configures personal development customizations with overlay mounts for `~/.gemini`, `~/.claude`, `~/.config/opencode`, and `~/.pi` (read-only host credentials and persistent named volumes across rebuilds, with selective write protection for pi.dev settings).
 
 ### 2. AI CLIs (`ai-clis`)
 Installs popular AI coding CLIs:

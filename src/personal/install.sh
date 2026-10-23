@@ -7,6 +7,8 @@ echo "=================================================="
 
 # Options passed from devcontainer-feature.json
 ENABLE_GEMINI="${ENABLEGEMINI:-${ENABLE_GEMINI:-true}}"
+ENABLE_CLAUDE="${ENABLECLAUDE:-${ENABLE_CLAUDE:-true}}"
+ENABLE_OPENCODE="${ENABLEOPENCODE:-${ENABLE_OPENCODE:-true}}"
 ENABLE_PI="${ENABLEPI:-${ENABLE_PI:-true}}"
 PI_PROTECT_SETTINGS="${PIPROTECTSETTINGS:-${PI_PROTECT_SETTINGS:-true}}"
 PI_WRITABLE_PATHS="${PIWRITABLEPATHS:-${PI_WRITABLE_PATHS:-agent/history,agent/sessions}}"
@@ -17,13 +19,15 @@ REMOTE_USER="${_REMOTE_USER:-root}"
 REMOTE_USER_HOME="${_REMOTE_USER_HOME:-/root}"
 
 echo "Configured settings:"
-echo "  Remote user:          ${REMOTE_USER}"
-echo "  Remote user home:     ${REMOTE_USER_HOME}"
-echo "  Enable ~/.gemini:     ${ENABLE_GEMINI}"
-echo "  Enable ~/.pi:         ${ENABLE_PI}"
-echo "  Protect pi settings:  ${PI_PROTECT_SETTINGS}"
-echo "  Pi writable paths:    ${PI_WRITABLE_PATHS}"
-echo "  Update PATH:          ${UPDATE_PATH}"
+echo "  Remote user:                ${REMOTE_USER}"
+echo "  Remote user home:           ${REMOTE_USER_HOME}"
+echo "  Enable ~/.gemini:           ${ENABLE_GEMINI}"
+echo "  Enable ~/.claude:           ${ENABLE_CLAUDE}"
+echo "  Enable ~/.config/opencode:  ${ENABLE_OPENCODE}"
+echo "  Enable ~/.pi:               ${ENABLE_PI}"
+echo "  Protect pi settings:        ${PI_PROTECT_SETTINGS}"
+echo "  Pi writable paths:          ${PI_WRITABLE_PATHS}"
+echo "  Update PATH:                ${UPDATE_PATH}"
 
 # Install utilities (fuse-overlayfs, util-linux) if package manager is available
 install_packages() {
@@ -55,6 +59,10 @@ VAR_DIR="/var/lib/devcontainer-personal"
 mkdir -p "${SHARE_DIR}"
 mkdir -p "${VAR_DIR}/ro-gemini"
 mkdir -p "${VAR_DIR}/volume-gemini"
+mkdir -p "${VAR_DIR}/ro-claude"
+mkdir -p "${VAR_DIR}/volume-claude"
+mkdir -p "${VAR_DIR}/ro-opencode"
+mkdir -p "${VAR_DIR}/volume-opencode"
 mkdir -p "${VAR_DIR}/ro-pi"
 mkdir -p "${VAR_DIR}/volume-pi"
 mkdir -p "${VAR_DIR}/empty"
@@ -66,6 +74,8 @@ cat <<EOF > "${SHARE_DIR}/config.env"
 REMOTE_USER="${REMOTE_USER}"
 REMOTE_USER_HOME="${REMOTE_USER_HOME}"
 ENABLE_GEMINI="${ENABLE_GEMINI}"
+ENABLE_CLAUDE="${ENABLE_CLAUDE}"
+ENABLE_OPENCODE="${ENABLE_OPENCODE}"
 ENABLE_PI="${ENABLE_PI}"
 PI_PROTECT_SETTINGS="${PI_PROTECT_SETTINGS}"
 PI_WRITABLE_PATHS="${PI_WRITABLE_PATHS}"
@@ -86,7 +96,7 @@ if [ "${UPDATE_PATH}" = "true" ]; then
     mkdir -p /etc/profile.d
     cat <<'EOF' > "${PROFILE_SCRIPT}"
 # Added by Devcontainer Personal Customizations Feature
-for p in "$HOME/.gemini/bin" "$HOME/.gemini/antigravity/bin" "$HOME/.pi/bin" "$HOME/.pi/agent/bin"; do
+for p in "$HOME/.gemini/bin" "$HOME/.gemini/antigravity/bin" "$HOME/.claude/bin" "$HOME/.local/bin" "$HOME/.pi/bin" "$HOME/.pi/agent/bin"; do
     if [ -d "$p" ]; then
         case ":$PATH:" in
             *":$p:"*) ;;

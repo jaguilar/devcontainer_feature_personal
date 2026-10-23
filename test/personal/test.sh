@@ -47,7 +47,22 @@ if [ ! -d "${TARGET_HOME}/.pi/agent/history" ]; then
 fi
 
 check "user ~/.gemini exists" test -d "${TARGET_HOME}/.gemini"
+check "user ~/.claude exists" test -d "${TARGET_HOME}/.claude"
+check "user ~/.config/opencode exists" test -d "${TARGET_HOME}/.config/opencode"
 check "user ~/.pi exists" test -d "${TARGET_HOME}/.pi"
+
+# 4. Verify Claude and OpenCode writeability
+CLAUDE_TEST_FILE="${TARGET_HOME}/.claude/test_claude_write.txt"
+touch "${CLAUDE_TEST_FILE}"
+echo "sample-claude-state" > "${CLAUDE_TEST_FILE}"
+check "writes to ~/.claude succeed" test -f "${CLAUDE_TEST_FILE}"
+rm -f "${CLAUDE_TEST_FILE}"
+
+OPENCODE_TEST_FILE="${TARGET_HOME}/.config/opencode/test_opencode_write.txt"
+touch "${OPENCODE_TEST_FILE}"
+echo "sample-opencode-config" > "${OPENCODE_TEST_FILE}"
+check "writes to ~/.config/opencode succeed" test -f "${OPENCODE_TEST_FILE}"
+rm -f "${OPENCODE_TEST_FILE}"
 
 # 5. Verify Gemini full writeability
 GEMINI_TEST_FILE="${TARGET_HOME}/.gemini/test_gemini_write.txt"
