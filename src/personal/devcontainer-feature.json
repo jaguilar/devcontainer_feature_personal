@@ -55,8 +55,8 @@
   },
   "mounts": [
     {
-      "source": "${localEnv:HOME}/.gemini",
-      "target": "/var/lib/devcontainer-personal/ro-gemini",
+      "source": "${localEnv:HOME}",
+      "target": "/var/lib/devcontainer-personal/host-home",
       "type": "bind"
     },
     {
@@ -65,29 +65,14 @@
       "type": "volume"
     },
     {
-      "source": "${localEnv:HOME}/.claude",
-      "target": "/var/lib/devcontainer-personal/ro-claude",
-      "type": "bind"
-    },
-    {
       "source": "devcontainer-personal-claude-${devcontainerId}",
       "target": "/var/lib/devcontainer-personal/volume-claude",
       "type": "volume"
     },
     {
-      "source": "${localEnv:HOME}/.config/opencode",
-      "target": "/var/lib/devcontainer-personal/ro-opencode",
-      "type": "bind"
-    },
-    {
       "source": "devcontainer-personal-opencode-${devcontainerId}",
       "target": "/var/lib/devcontainer-personal/volume-opencode",
       "type": "volume"
-    },
-    {
-      "source": "${localEnv:HOME}/.pi",
-      "target": "/var/lib/devcontainer-personal/ro-pi",
-      "type": "bind"
     },
     {
       "source": "devcontainer-personal-pi-${devcontainerId}",

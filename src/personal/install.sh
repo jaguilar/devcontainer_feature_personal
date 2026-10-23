@@ -57,6 +57,7 @@ SHARE_DIR="/usr/local/share/devcontainer-personal"
 VAR_DIR="/var/lib/devcontainer-personal"
 
 mkdir -p "${SHARE_DIR}"
+mkdir -p "${VAR_DIR}/host-home"
 mkdir -p "${VAR_DIR}/ro-gemini"
 mkdir -p "${VAR_DIR}/volume-gemini"
 mkdir -p "${VAR_DIR}/ro-claude"

@@ -234,7 +234,47 @@ if [ "$(id -u)" -ne 0 ]; then
         sudo "$0" --setup-only || true
     fi
 else
-    # Running as root: perform mount setups
+    # Running as root: stage available directories from host-home if present
+    HOST_HOME="${VAR_DIR}/host-home"
+    if mountpoint -q "${HOST_HOME}" 2>/dev/null || [ -d "${HOST_HOME}" ]; then
+        if [ "${ENABLE_GEMINI}" = "true" ] && [ -d "${HOST_HOME}/.gemini" ]; then
+            mkdir -p "${VAR_DIR}/ro-gemini"
+            mount --bind "${HOST_HOME}/.gemini" "${VAR_DIR}/ro-gemini" 2>/dev/null || true
+            mount -o remount,ro,bind "${VAR_DIR}/ro-gemini" 2>/dev/null || true
+        fi
+
+        if [ "${ENABLE_CLAUDE}" = "true" ] && [ -d "${HOST_HOME}/.claude" ]; then
+            mkdir -p "${VAR_DIR}/ro-claude"
+            mount --bind "${HOST_HOME}/.claude" "${VAR_DIR}/ro-claude" 2>/dev/null || true
+            mount -o remount,ro,bind "${VAR_DIR}/ro-claude" 2>/dev/null || true
+        fi
+
+        if [ "${ENABLE_OPENCODE}" = "true" ]; then
+            if [ -d "${HOST_HOME}/.config/opencode" ]; then
+                mkdir -p "${VAR_DIR}/ro-opencode"
+                mount --bind "${HOST_HOME}/.config/opencode" "${VAR_DIR}/ro-opencode" 2>/dev/null || true
+                mount -o remount,ro,bind "${VAR_DIR}/ro-opencode" 2>/dev/null || true
+            elif [ -d "${HOST_HOME}/.opencode" ]; then
+                mkdir -p "${VAR_DIR}/ro-opencode"
+                mount --bind "${HOST_HOME}/.opencode" "${VAR_DIR}/ro-opencode" 2>/dev/null || true
+                mount -o remount,ro,bind "${VAR_DIR}/ro-opencode" 2>/dev/null || true
+            fi
+        fi
+
+        if [ "${ENABLE_PI}" = "true" ] && [ -d "${HOST_HOME}/.pi" ]; then
+            mkdir -p "${VAR_DIR}/ro-pi"
+            mount --bind "${HOST_HOME}/.pi" "${VAR_DIR}/ro-pi" 2>/dev/null || true
+            mount -o remount,ro,bind "${VAR_DIR}/ro-pi" 2>/dev/null || true
+        fi
+
+        # Immediately unmount host-home so no extraneous host files remain in container
+        if mountpoint -q "${HOST_HOME}" 2>/dev/null; then
+            umount -l "${HOST_HOME}" 2>/dev/null || true
+        fi
+        rmdir "${HOST_HOME}" 2>/dev/null || true
+    fi
+
+    # Perform mount setups
     if [ "${ENABLE_GEMINI}" = "true" ]; then
         setup_overlay "gemini"
     fi
