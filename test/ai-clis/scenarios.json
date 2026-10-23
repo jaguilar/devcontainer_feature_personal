@@ -1,0 +1,15 @@
+{
+  "test_default": {
+    "image": "mcr.microsoft.com/devcontainers/base:debian",
+    "features": {
+      "ai-clis": {}
+    }
+  },
+  "test_ubuntu": {
+    "image": "mcr.microsoft.com/devcontainers/base:ubuntu",
+    "features": {
+      "ai-clis": {}
+    }
+  }
+}
+

@@ -1,0 +1,66 @@
+{
+  "id": "ai-clis",
+  "version": "1.0.0",
+  "name": "AI CLIs",
+  "description": "Installs popular AI coding CLIs: Gemini, Claude Code, OpenCode, and Pi.dev.",
+  "keywords": [
+    "ai",
+    "cli",
+    "gemini",
+    "claude",
+    "opencode",
+    "pi",
+    "pi.dev"
+  ],
+  "options": {
+    "gemini": {
+      "type": "boolean",
+      "default": true,
+      "description": "Install Google Gemini CLI (@google/gemini-cli)"
+    },
+    "geminiVersion": {
+      "type": "string",
+      "default": "latest",
+      "description": "Version of @google/gemini-cli to install"
+    },
+    "claude": {
+      "type": "boolean",
+      "default": true,
+      "description": "Ensure Claude Code CLI is installed (@anthropic-ai/claude-code)"
+    },
+    "claudeVersion": {
+      "type": "string",
+      "default": "latest",
+      "description": "Version of @anthropic-ai/claude-code to install if not present"
+    },
+    "opencode": {
+      "type": "boolean",
+      "default": true,
+      "description": "Install OpenCode CLI (opencode-ai)"
+    },
+    "opencodeVersion": {
+      "type": "string",
+      "default": "latest",
+      "description": "Version of opencode-ai to install"
+    },
+    "pi": {
+      "type": "boolean",
+      "default": true,
+      "description": "Install pi.dev CLI (@earendil-works/pi-coding-agent)"
+    },
+    "piVersion": {
+      "type": "string",
+      "default": "latest",
+      "description": "Version of @earendil-works/pi-coding-agent to install"
+    }
+  },
+  "dependsOn": {
+    "ghcr.io/devcontainers/features/node:1": {},
+    "ghcr.io/anthropics/devcontainer-features/claude-code:1": {}
+  },
+  "installsAfter": [
+    "ghcr.io/devcontainers/features/node",
+    "ghcr.io/anthropics/devcontainer-features/claude-code"
+  ]
+}
+
